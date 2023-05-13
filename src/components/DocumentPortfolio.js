@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import Tesseract from 'tesseract.js';
+import PropTypes from 'prop-types';
 
-const DocumentPortfolio = () => {
+const DocumentPortfolio = ({ userDetails, onUpdateUserDetails }) => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [thumbnails, setThumbnails] = useState({});
@@ -11,6 +12,52 @@ const DocumentPortfolio = () => {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setUploadedFiles((prevFiles) => [...prevFiles, file]);
+  };
+
+  const extractUserInfo = (text) => {
+
+    const namePattern = /Prenume\/Prenom\/First name\n(.*?)\n/;
+    const nameMatch = namePattern.exec(text);
+    const name = nameMatch ? nameMatch[1] : "Name not found";
+    
+    // Extract the user's address
+    const addressPattern = /Domiciliu.*?\n((?:.*?\n){2})/;
+    const addressMatch = addressPattern.exec(text);
+    const address = addressMatch ? addressMatch[1].trim() : "Address not found";
+    
+    console.log("Name:", name);
+    console.log("Address:", address);
+
+    // Process the extracted text to obtain user information
+    // In this example, I'm not implementing the actual extraction logic, but you should
+    // implement it based on the format of the text you expect from the OCR process
+    const newUserInfo = {
+      ...userDetails,
+      name: name, // Replace with actual extracted name
+      placeOfBirth: 'New York', // Replace with actual extracted place of birth
+      domiciliu: address,
+      CNP: '6230510357021',
+      statut: 'Necasatorit'
+
+      // ... add more fields as needed
+    };
+    return newUserInfo;
+};
+
+  const handleExtractText = async () => {
+    if (selectedFile) {
+      try {
+        const { data } = await Tesseract.recognize(selectedFile, 'ron', { logger: (m) => console.log(m) });
+        console.log('Extracted text:', data.text);
+
+        // Extract and update user information based on the extracted text
+        const newUserInfo = extractUserInfo(data.text);
+        if(selectedFile.name == 'buletin.png')
+        onUpdateUserDetails(newUserInfo);
+      } catch (error) {
+        console.error('Error while extracting text:', error);
+      }
+    }
   };
 
   const processFile = async (file) => {
@@ -97,9 +144,9 @@ const DocumentPortfolio = () => {
     return (
       <Box display="flex" flexDirection="column" gap="16px" alignItems="center">
         <Typography variant="body1">Selected file: {selectedFile.name}</Typography>
-        <Button variant="contained" color="primary" onClick={() => processFile(selectedFile)}>
-          Extract Text
-        </Button>
+        <Button variant="contained" color="primary" onClick={handleExtractText}>
+  Extract Text
+</Button>
         {/* Display the extracted text here */}
       </Box>
     );
@@ -132,4 +179,11 @@ const DocumentPortfolio = () => {
   );
 };
 
+
+DocumentPortfolio.propTypes = {
+    userInfo: PropTypes.object.isRequired,
+    onUpdateUserInfo: PropTypes.func.isRequired,
+  };
+
 export default DocumentPortfolio;
+
