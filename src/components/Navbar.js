@@ -11,6 +11,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { styled } from "@mui/system";
+import customIcon from './assets/customIcon.png';
 
 const StyledNavLink = styled(NavLink)(({ theme }) => ({
   "&.active-link": activeClassNameStyle,
@@ -21,14 +22,15 @@ const Navbar = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" style={{ backgroundColor: '#003995' }}>
       <Toolbar>
         <Grid container justifyContent="space-between" alignItems="center">
-          <Grid item>
+          <Box display="flex" alignItems="center">
+            <img src={customIcon} alt="Custom Icon" style={{ marginRight: '8px', height: '40px', width: '40px' }} />
             <Typography variant="h6" component="div">
-              TownHall AI
+              PrimăriaGPTM
             </Typography>
-          </Grid>
+          </Box>
           {!isSmallScreen && (
             <Grid item container xs spacing={0} justifyContent="center">
               <Grid item>

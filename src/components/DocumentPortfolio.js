@@ -15,9 +15,17 @@ const DocumentPortfolio = ({ userDetails, onUpdateUserDetails }) => {
   };
 
   const extractUserInfo = (text) => {
-
-    const namePattern = /Prenume\/Prenom\/First name\n(.*?)\n/;
-    const nameMatch = namePattern.exec(text);
+    const lines = text.split('\n');
+    const cleanedLines = lines.map(line => line
+        .replace(/(?:^|\s)[^a-zA-Z0-9\s]{1}(?:\s|$)|[^a-zA-Z0-9\s]{2,}|[,]|(?<=\s|^)[a-zA-Z](?=\s|$)/g, ' ')
+        .replace(/\s+$/g, '')
+    );
+    const cleanedText = cleanedLines.join('\n');
+    
+    console.log(cleanedText);
+    // Now use the cleanedText to extract the information
+    const namePattern = /(?:Prenume|Prenom|First name|Preno nRMe)\n(.*?)\n/;
+    const nameMatch = namePattern.exec(cleanedText);
     const name = nameMatch ? nameMatch[1] : "Name not found";
     
     // Extract the user's address
@@ -52,7 +60,7 @@ const DocumentPortfolio = ({ userDetails, onUpdateUserDetails }) => {
 
         // Extract and update user information based on the extracted text
         const newUserInfo = extractUserInfo(data.text);
-        if(selectedFile.name == 'buletin.png')
+        if(selectedFile.name.includes("buletin"))
         onUpdateUserDetails(newUserInfo);
       } catch (error) {
         console.error('Error while extracting text:', error);
@@ -144,7 +152,7 @@ const DocumentPortfolio = ({ userDetails, onUpdateUserDetails }) => {
     return (
       <Box display="flex" flexDirection="column" gap="16px" alignItems="center">
         <Typography variant="body1">Selected file: {selectedFile.name}</Typography>
-        <Button variant="contained" color="primary" onClick={handleExtractText}>
+        <Button variant="contained" color="primary" style={{ backgroundColor: '#fcd34d' , color: 'black'  }} onClick={handleExtractText}>
   Extract Text
 </Button>
         {/* Display the extracted text here */}
@@ -165,6 +173,7 @@ const DocumentPortfolio = ({ userDetails, onUpdateUserDetails }) => {
       <Button
         variant="contained"
         color="primary"
+        style={{ backgroundColor: '#fcd34d' , color: 'black'  }}
         onClick={() => {
           inputFileRef.current.click();
         }}
